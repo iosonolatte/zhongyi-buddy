@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>中医Buddy · 六经辨证 AI</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('tcm-theme');
+        if (!t) t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+    })();
+  </script>
+</head>
+<body>
+  <div id="app">
+    <!-- 侧边导航 -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">醫</div>
+        <div class="brand-text">
+          <div class="brand-title">中医Buddy</div>
+          <div class="brand-sub">六经辨证 · AI 诊疗</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="nav-item active" data-view="diagnosis"><span class="nav-ico">🩺</span>辨证问诊</button>
+        <button class="nav-item" data-view="formulas"><span class="nav-ico">📜</span>方剂查询</button>
+        <button class="nav-item" data-view="herbs"><span class="nav-ico">🌿</span>中药查询</button>
+        <button class="nav-item" data-view="acupuncture"><span class="nav-ico">📍</span>针灸经络</button>
+        <button class="nav-item" data-view="tools"><span class="nav-ico">🧮</span>实用工具</button>
+      </nav>
+      <div class="sidebar-foot">
+        <button id="themeToggle" class="theme-btn" title="切换主题">🌓</button>
+        <div class="foot-note">倪海厦人纪 · 六经体系</div>
+      </div>
+    </aside>
+
+    <!-- 主区 -->
+    <main class="main">
+      <!-- 辨证问诊 -->
+      <section class="view active" id="view-diagnosis">
+        <header class="view-head">
+          <h1>辨证问诊</h1>
+          <p class="view-desc">按倪海厦老师方法，七步问诊，六经定位，给出经方建议。</p>
+          <button id="historyBtn" class="ghost-btn">📋 历史</button>
+          <button id="restartBtn" class="ghost-btn">↺ 重新问诊</button>
+        </header>
+        <div id="diagHistory" class="diag-history" style="display:none"></div>
+        <div id="diagProgress" class="diag-progress"></div>
+        <div class="chat" id="chat"></div>
+        <div class="chat-input" id="chatInput"></div>
+      </section>
+
+      <!-- 方剂查询 -->
+      <section class="view" id="view-formulas">
+        <header class="view-head">
+          <h1>方剂查询</h1>
+          <p class="view-desc">290 首经方，支持按方名、主治、组成、关键词检索。</p>
+        </header>
+        <div class="search-bar">
+          <input id="formulaSearch" type="search" placeholder="搜索方名 / 主治 / 药材 / 关键词…" />
+          <select id="formulaCategory"></select>
+        </div>
+        <div class="split">
+          <div class="list-panel" id="formulaList"></div>
+          <div class="detail-panel" id="formulaDetail">
+            <div class="empty-hint">← 选择左侧方剂查看详情</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 中药查询 -->
+      <section class="view" id="view-herbs">
+        <header class="view-head">
+          <h1>中药查询</h1>
+          <p class="view-desc">440 味中药，倪海厦人纪讲义解读。</p>
+        </header>
+        <div class="search-bar">
+          <input id="herbSearch" type="search" placeholder="搜索药名 / 类别 / 功效…" />
+          <select id="herbCategory"></select>
+        </div>
+        <div class="split">
+          <div class="list-panel" id="herbList"></div>
+          <div class="detail-panel" id="herbDetail">
+            <div class="empty-hint">← 选择左侧中药查看详情</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 针灸经络 -->
+      <section class="view" id="view-acupuncture">
+        <header class="view-head">
+          <h1>针灸经络</h1>
+          <p class="view-desc">按症状查穴 · 倪海厦透针法。</p>
+        </header>
+        <div class="tabs" id="acuTabs">
+          <button class="tab active" data-acu="symptom">症状取穴</button>
+          <button class="tab" data-acu="penetration">透针手法</button>
+        </div>
+        <div class="split" id="acuSymptom">
+          <div class="list-panel" id="acuList"></div>
+          <div class="detail-panel" id="acuDetail">
+            <div class="empty-hint">← 选择左侧症状查看配穴</div>
+          </div>
+        </div>
+        <div class="list-panel" id="acuPenetration" style="display:none"></div>
+      </section>
+
+      <!-- 实用工具 -->
+      <section class="view" id="view-tools">
+        <header class="view-head">
+          <h1>实用工具</h1>
+          <p class="view-desc">子午流注取穴 · 经方剂量换算。</p>
+        </header>
+        <div class="tabs" id="toolTabs">
+          <button class="tab active" data-tool="ziwu">子午流注</button>
+          <button class="tab" data-tool="dosage">经方剂量换算</button>
+        </div>
+        <div class="tool-panel" id="ziwuPanel"></div>
+        <div class="tool-panel" id="dosagePanel" style="display:none"></div>
+      </section>
+    </main>
+
+    <!-- 移动端底部导航 -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="bn-item active" data-view="diagnosis"><span class="bn-ico">🩺</span><span class="bn-lbl">辨证</span></button>
+      <button class="bn-item" data-view="formulas"><span class="bn-ico">📜</span><span class="bn-lbl">方剂</span></button>
+      <button class="bn-item" data-view="herbs"><span class="bn-ico">🌿</span><span class="bn-lbl">中药</span></button>
+      <button class="bn-item" data-view="acupuncture"><span class="bn-ico">📍</span><span class="bn-lbl">针灸</span></button>
+      <button class="bn-item" data-view="tools"><span class="bn-ico">🧮</span><span class="bn-lbl">工具</span></button>
+      <button class="bn-item bn-theme" id="themeToggleMobile" aria-label="切换主题"><span class="bn-ico">🌓</span></button>
+    </nav>
+  </div>
+
+  <script defer src="rules-a.js"></script>
+  <script defer src="rules-b.js"></script>
+  <script defer src="engine.js"></script>
+  <script defer src="diagnose.js"></script>
+  <script defer src="data-loader.js"></script>
+  <script defer src="app.js"></script>
+</body>
+</html>

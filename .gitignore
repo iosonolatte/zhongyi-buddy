@@ -1,0 +1,7 @@
+# WorkBuddy 内部状态目录（非项目源码，勿提交）
+.workbuddy/
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+*.log
