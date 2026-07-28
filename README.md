@@ -39,7 +39,6 @@ python -m http.server 8000
 ## 🌐 在线访问
 
 - **GitHub Pages**：https://iosonolatte.github.io/zhongyi-buddy/
-- **云端版（CloudStudio）**：https://9707061ea881456c8b0c3f1cb91f7eac.app.codebuddy.work
 
 ## 📁 目录结构
 
