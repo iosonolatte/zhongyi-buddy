@@ -335,18 +335,37 @@
     }
 
     // 各类警示
-    if (r.trueFalseHeatCold) h += `<div class="note-box warn"><b>⚠️ 真寒假热 / 真热假寒</b><br>${esc(r.trueFalseHeatCold.note || r.trueFalseHeatCold)}</div>`;
+    if (r.trueFalseHeatCold) {
+      const tf = r.trueFalseHeatCold;
+      const dims = tf.dimensions ? Object.keys(tf.dimensions).map((k) => `${k}：${tf.dimensions[k]}`).join('　') : '';
+      h += `<div class="note-box warn"><b>⚠️ ${esc(tf.type || '真寒假热 / 真热假寒')}</b><br>${esc(tf.description || '')}${dims ? '<br><span class="label">辨象：</span>' + esc(dims) : ''}</div>`;
+    }
     if (r.pulseTongueContradiction) h += `<div class="note-box warn"><b>脉舌矛盾</b><br>${esc(r.pulseTongueContradiction)}</div>`;
     if (r.transmissionWarning) h += `<div class="note-box warn"><b>传变警示</b><br>${esc(r.transmissionWarning)}</div>`;
-    if (r.bloodStasisSigns) h += `<div class="note-box"><b>瘀血指征（瘀血五法）</b><br>${esc(r.bloodStasisSigns)}</div>`;
+    if (r.bloodStasisSigns && r.bloodStasisSigns.length) {
+      h += `<div class="note-box"><b>瘀血指征（瘀血五法）</b>`;
+      r.bloodStasisSigns.forEach((m) => {
+        h += `<div style="font-size:13px;margin-top:4px">· <b>${esc(m.method || '')}</b>：${esc(m.description || '')}</div>`;
+      });
+      h += `</div>`;
+    }
     if (r.medicationRules && r.medicationRules.length) {
-      h += `<div class="note-box"><b>用药铁律</b><div class="chips">` + r.medicationRules.map((m) => `<span class="chip">${esc(m.rule || m)}</span>`).join('') + `</div></div>`;
+      h += `<div class="note-box"><b>用药铁律</b>`;
+      r.medicationRules.forEach((m) => {
+        h += `<div style="font-size:13px;margin-top:4px">· <b>${esc(m.condition || '')}</b>：${esc(m.prohibition || '')}${m.reason ? '（' + esc(m.reason) + '）' : ''}</div>`;
+      });
+      h += `</div>`;
     }
     if (r.sweatingContraindications && r.sweatingContraindications.length) {
-      h += `<div class="note-box warn"><b>汗法禁忌</b><div class="chips">` + r.sweatingContraindications.map((m) => `<span class="chip">${esc(m.rule || m)}</span>`).join('') + `</div></div>`;
+      h += `<div class="note-box warn"><b>汗法禁忌</b>`;
+      r.sweatingContraindications.forEach((m) => {
+        h += `<div style="font-size:13px;margin-top:4px">· <b>${esc(m.condition || '')}</b>：${esc(m.reason || '')}${m.consequence ? ' → ' + esc(m.consequence) : ''}</div>`;
+      });
+      h += `</div>`;
     }
     if (r.pulseCombination) {
-      h += `<div class="note-box"><b>组合脉象</b><br>${esc(r.pulseCombination.pulse1)}：${esc(r.pulseCombination.note || '')}</div>`;
+      const pc = r.pulseCombination;
+      h += `<div class="note-box"><b>组合脉象</b><br>${esc(pc.pulse1)} + ${esc(pc.pulse2 || '')} → ${esc(pc.description || '')}${pc.formula ? '（' + esc(pc.formula) + '）' : ''}</div>`;
     }
 
     h += `<button class="copy-btn" data-copy="1">📋 复制处方文本</button>`;
