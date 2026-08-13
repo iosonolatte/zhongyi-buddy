@@ -203,7 +203,7 @@
     input.innerHTML = '';
     setStep(3);
     const tenQs = Diagnosis.eng.getTenQuestions();
-    const idx = Diagnosis.eng._tenQuestionIndex;
+    const idx = Diagnosis.eng.tenQuestionIndex;
     if (idx >= tenQs.length) { renderFollowUps(); return; }
     const q = tenQs[idx];
     pushBot('<span class="q-title">倪海厦十问 · ' + (idx + 1) + '/' + tenQs.length + '</span>' + esc(q.question));

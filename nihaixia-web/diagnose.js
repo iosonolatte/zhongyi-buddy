@@ -10,11 +10,18 @@
   function ans(eng, key) { return eng._answers[key]; }
   function has(eng, key) { return eng._answers[key] === true; }
   // 主诉/跟进回答的文本片段匹配（对应原版 _selectedSymptoms.contains）
+  // 注意：answerFollowUp 会把 followUp 的选项文本整体 push 进 _selectedSymptoms，
+  // 其中「不痛/没汗/正常」等否定/中性选项若不排除，会因子串包含（如「不痛」含「痛」）
+  // 造成 sel 误命中。这里跳过以否定/中性词开头的答案。
+  // （「不能说话」虽以「不」开头但属阳性症状，不过其判定走 has(difficulty_speak)，
+  //   且 sel 从不以「不能…」为子串匹配，故排除不影响结果。）
   function sel(eng, sub) {
     const list = eng._selectedSymptoms || [];
     for (let i = 0; i < list.length; i++) {
       const s = list[i];
-      if (s && s.indexOf && s.indexOf(sub) >= 0) return true;
+      if (!s || !s.indexOf) continue;
+      if (/^(没有|没|不|无|正常|还好)/.test(s)) continue;
+      if (s.indexOf(sub) >= 0) return true;
     }
     return false;
   }
