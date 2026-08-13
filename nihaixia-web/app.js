@@ -500,7 +500,7 @@
     // 透针
     const pen = (acu.penetration || []);
     const pbox = $('#acuPenetration');
-    pbox.innerHTML = pen.length ? pen.map((p, i) => `<div class="list-item" data-i="${i}"><div class="li-title">${esc(p.name)}</div><div class="li-sub">${(p.indications || []).join('、')}</div></div>`).join('') : '<div class="empty-hint">无数据</div>';
+    pbox.innerHTML = pen.length ? pen.map((p, i) => `<div class="list-item" data-i="${i}"><div class="li-title">${esc(p.name)}</div><div class="li-sub">${(p.indications || []).map((x) => esc(x)).join('、')}</div></div>`).join('') : '<div class="empty-hint">无数据</div>';
     pbox.querySelectorAll('.list-item').forEach((el) => {
       el.addEventListener('click', () => {
         pbox.querySelectorAll('.list-item').forEach((x) => x.classList.remove('active'));

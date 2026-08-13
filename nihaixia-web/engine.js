@@ -50,13 +50,9 @@
     getTongueShapeOptions() { return R.tongueShapeOptions; }
     getPulseOptions() { return R.pulseOptions; }
 
-    getTenQuestions(defaultGender) {
-      const questions = R.tenQuestions.slice();
-      if (defaultGender && defaultGender.length) {
-        this._gender = defaultGender;
-        return questions.filter((q) => q.key !== 'gender');
-      }
-      return questions;
+    getTenQuestions() {
+      // 原版支持通过设置页预设性别(defaultGender)来跳过性别题，网页版无设置页，故仅返回完整十问。
+      return R.tenQuestions.slice();
     }
 
     // ---- 主诉
@@ -91,7 +87,6 @@
         if (tongueShape === '红') this._answers['tongue_red_coated_yellow'] = true;
         if (tongueShape === '绛紫') this._answers['tongue_purple'] = true;
         if (tongueShape === '胖大' || tongueShape === '齿痕') this._answers['tongue_swollen'] = true;
-        this._adjustMeridianByTongue('tongue_shape', tongueShape);
       }
       if (pulseType != null) {
         this._answers['pulse_type'] = pulseType;
@@ -102,20 +97,19 @@
     }
 
     _adjustMeridianByTongue(type, value) {
-      const weights = R.tonguePulseWeights[type];
-      if (!weights) return;
-      const weight = weights[value] || 0;
-      if (weight <= 0) return;
-      if (type === 'tongue_coating') {
-        if (value === '黄厚' && this._meridianDirection === '太阴/少阴') this._meridianDirection = '阳明';
+      // 仅「黄厚苔」这一条有直接定经价值（阳明腑实典型舌象）。
+      // 舌质（红/淡白/胖大/绛紫等）的影响不在此处处理——已通过
+      // tongue_red_coated_yellow / tongue_pale_coated_white / tongue_purple / tongue_swollen
+      // 等布尔标志在 _decideMeridianDirection 的评分系统中体现。
+      if (type !== 'tongue_coating') return;
+      if (value === '黄厚' && this._meridianDirection === '太阴/少阴') {
+        this._meridianDirection = '阳明';
       }
     }
 
     _adjustMeridianByPulse(pulse) {
-      const weights = R.tonguePulseWeights['pulse'];
-      if (!weights) return;
-      const weight = weights[pulse] || 0;
-      if (weight <= 0.3) return;
+      // 仅当经别仍为模糊态「太阴/少阴」时，用有定经意义的脉象收窄方向；
+      // 其余脉象（滑/涩/缓/弱/迟/数等）不参与定经，留待评分系统综合判断。
       if ((pulse === '浮' || pulse === '紧') && this._meridianDirection === '太阴/少阴' && this._answers['temperature'] === 'fever_chills') {
         this._meridianDirection = '太阳';
       } else if (pulse === '洪' && this._meridianDirection === '太阴/少阴') {
