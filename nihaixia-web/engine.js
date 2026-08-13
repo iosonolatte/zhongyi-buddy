@@ -14,6 +14,12 @@
     result: 'result',
   };
 
+  // 寒热模式「只怕冷不发热」(chills_no_fever) 的初始经别方向——太阴/少阴未分。
+  // 这是问诊过程中的「模糊态」，需结合舌脉(_adjustMeridianBy*)与十问评分
+  // (_decideMeridianDirection) 最终收窄为「太阴」或「少阴」。
+  // 注意：rules-a.js / rules-b.js 里的同名串是数据（展示/匹配用），不属于本常量范畴。
+  const UNRESOLVED_COLD_MERIDIAN = '太阴/少阴';
+
   class DiagnosticEngine {
     constructor() { this.reset(); }
 
@@ -102,7 +108,7 @@
       // tongue_red_coated_yellow / tongue_pale_coated_white / tongue_purple / tongue_swollen
       // 等布尔标志在 _decideMeridianDirection 的评分系统中体现。
       if (type !== 'tongue_coating') return;
-      if (value === '黄厚' && this._meridianDirection === '太阴/少阴') {
+      if (value === '黄厚' && this._meridianDirection === UNRESOLVED_COLD_MERIDIAN) {
         this._meridianDirection = '阳明';
       }
     }
@@ -110,16 +116,16 @@
     _adjustMeridianByPulse(pulse) {
       // 仅当经别仍为模糊态「太阴/少阴」时，用有定经意义的脉象收窄方向；
       // 其余脉象（滑/涩/缓/弱/迟/数等）不参与定经，留待评分系统综合判断。
-      if ((pulse === '浮' || pulse === '紧') && this._meridianDirection === '太阴/少阴' && this._answers['temperature'] === 'fever_chills') {
+      if ((pulse === '浮' || pulse === '紧') && this._meridianDirection === UNRESOLVED_COLD_MERIDIAN && this._answers['temperature'] === 'fever_chills') {
         this._meridianDirection = '太阳';
-      } else if (pulse === '洪' && this._meridianDirection === '太阴/少阴') {
+      } else if (pulse === '洪' && this._meridianDirection === UNRESOLVED_COLD_MERIDIAN) {
         this._meridianDirection = '阳明';
-      } else if (pulse === '弦' && this._meridianDirection === '太阴/少阴') {
+      } else if (pulse === '弦' && this._meridianDirection === UNRESOLVED_COLD_MERIDIAN) {
         this._meridianDirection = '少阳';
-      } else if ((pulse === '微' || pulse === '细') && this._meridianDirection === '太阴/少阴') {
+      } else if ((pulse === '微' || pulse === '细') && this._meridianDirection === UNRESOLVED_COLD_MERIDIAN) {
         this._meridianDirection = '少阴';
       } else if (pulse === '沉' && this._meridianDirection === '太阳') {
-        this._meridianDirection = '太阴/少阴';
+        this._meridianDirection = UNRESOLVED_COLD_MERIDIAN;
       }
     }
 
@@ -228,7 +234,7 @@
     // ---- 六经定位
     _decideMeridianDirection() {
       // 修复原引擎：将方向写入 _answers['meridian'] 以便跟进问诊派生标志生效
-      if (this._meridianDirection == null || this._meridianDirection === '太阴/少阴') {
+      if (this._meridianDirection == null || this._meridianDirection === UNRESOLVED_COLD_MERIDIAN) {
         if (this._answers['temperature'] === 'fever_thirst_no_cold') {
           this._meridianDirection = '太阳';
         } else if (this._answers['temperature'] === 'fever_chills' && this._pulseType === '沉') {
@@ -243,7 +249,7 @@
         } else if (this._answers['temperature'] === 'upper_heat_lower_cold' ||
           (this._answers['upper_heat_lower_cold'] === true && this._answers['xiaoke'] === true)) {
           this._meridianDirection = '厥阴';
-        } else if (this._meridianDirection == null || this._meridianDirection === '太阴/少阴') {
+        } else if (this._meridianDirection == null || this._meridianDirection === UNRESOLVED_COLD_MERIDIAN) {
           let shaoyinScore = 0, taiyinScore = 0;
           if (this._answers['drowsy'] === true) shaoyinScore += 4;
           if (this._answers['cold_limbs'] === true) shaoyinScore += 3;
